@@ -1,7 +1,10 @@
 f = open('sample.txt', 'r')
+# f = open('RD_CRV_PTS_151231.txt', 'r')
 # with open('sample.txt', 'r') as reader:
 #   f = reader.read()
 # reader.closed
+
+import time
 
 # dictionary format: {start: [(end1)],[(end2)]}
 
@@ -16,7 +19,7 @@ g = {}
 lcount = -1
 
 #length of segment
-length = 4
+length = 8
 
 #Put in object
     #current loc
@@ -37,7 +40,9 @@ s= 0
 l = []
 #Preprocess into list
 for line in f:
-    l.append(line.strip('\n'))
+    l1 = line.strip('\n')
+    l1 = l1.strip('\r')
+    l.append(l1)
 
 for i in range(0,len(l)):
     # print line
@@ -53,7 +58,7 @@ for i in range(0,len(l)):
         #Check for manual end of road
         elif l[i] == 'end':
             if lcount > 1:
-                print "manual end" + l[i-1]
+                # print "manual end" + l[i-1]
                 g[s].append(l[i-1])
             lcount = 0
 
@@ -63,11 +68,11 @@ for i in range(0,len(l)):
             if s not in g.keys():
                 g[s] = []
             lcount += 1
-            print 'begin' + s
+            # print 'begin' + s
 
         #Check for end of segments
         elif lcount == length:
-            print "natural end" + l[i]
+            # print "natural end" + l[i]
             g[s].append(l[i])
             s = l[i]
             if s not in g.keys():
@@ -76,6 +81,9 @@ for i in range(0,len(l)):
 
         else:
             lcount += 1
+print g
+
+start_time = time.time()
 
 class PEV:
     def __init__(self, graph, current_location, pickup_location, dropoff, status):
@@ -109,10 +117,12 @@ class PEV:
             return next(self.paths())
         except StopIteration:
             return None
+        
 
-cab = PEV(g, '0', '1','17',False)
+cab = PEV(g, '0', '1','16',False)
 
 path = cab.find()
+print("--- %s seconds ---" % (time.time() - start_time))
 print path
 
     # if l[i] != 'start':

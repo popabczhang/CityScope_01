@@ -1,4 +1,5 @@
 f = open('sample.txt', 'r')
+od = open('OD_160330.tsv','r')
 # f = open('RD_CRV_PTS_151231.txt', 'r')
 # with open('sample.txt', 'r') as reader:
 #   f = reader.read()
@@ -19,7 +20,7 @@ g = {}
 lcount = -1
 
 #length of segment
-length = 8
+length = 4
 
 #Put in object
     #current loc
@@ -43,6 +44,10 @@ for line in f:
     l1 = line.strip('\n')
     l1 = l1.strip('\r')
     l.append(l1)
+
+#function for checking tolerance
+# def check(start,end):
+#     if start()
 
 for i in range(0,len(l)):
     # print line
@@ -86,19 +91,20 @@ print g
 start_time = time.time()
 
 class PEV:
-    def __init__(self, graph, current_location, pickup_location, dropoff, status):
+    def __init__(self, path, graph, current_location, pickup_location, dropoff, status):
         self.g = graph
         self.current = current_location
         self.pickup = pickup_location
         self.drop = dropoff
         self.stat = status
+        self.p = path
 
     #Start code for BST
     #Refer to http://eddmann.com/posts/depth-first-search-and-breadth-first-search-in-python/
-    def paths(self):
+    def paths(s,g):
         graph = self.g
-        start = self.pickup
-        goal = self.drop
+        start = s
+        goal = g
         queue = [(start, [start])]
         while queue:
             (vertex, path) = queue.pop(0)
@@ -109,17 +115,93 @@ class PEV:
                 else:
                     queue.append((next, path + [next]))
 
-    def find(self):
+    def update(self):
+        #e for empty
+        if self.stat == 'e':
+            pass
+        #f for find
+        elif self.stat == 'f':
+            self.current = self.p.pop(0)
+        #d for dropping off
+        elif self.stat == 'd':
+            self.current = self.p.pop(0)
+        else:
+            print "update error status"
+        #update location:  debug log: check what to do if cab finds the target location
+        if self.current == self.drop:
+            print "change from d to e" + self.stat
+            self.stat = 'e'
+        elif self.current == self.pickup:
+            print "change from f to d"
+            self.stat = 'd'
+
+
+    def find(startfind,goalfind):
         graph = self.g
-        start = self.pickup
-        goal = self.drop
+        start = startfind
+        goal = goalfind
         try:
-            return next(self.paths())
+            return next(self.paths(start,goal))
         except StopIteration:
             return None
+    #return list of paths
         
+#Controller code
 
-cab = PEV(g, '0', '1','16',False)
+#Initialize list of cabs:
+PEVlist = []
+cab1 = PEV([],g, '0', '1','16','e')
+PEVlist.append(cab1)
+cab2 = PEV([],g, '0', '1','16','e')
+PEVlist.append(cab2)
+cab3 = PEV([],g, '0', '1','16','e')
+PEVlist.append(cab3)
+
+#Initialize time in minutes
+time = 0
+
+#initialize list of unpicked trips
+demand = []
+
+def tupify(x,y):
+    tup = (x,y)
+    return tup
+
+for i in od:
+    #some sort of index i that represents a LIST in the table once I figure out the proper way to read this
+    while time < i[0]:
+        for cab in PEVlist:
+            if cab.status == 'e':
+                if len(demand) != 0:
+                    cab.status = 'f'
+                    #modify this indicator once you figure out how to split stuff
+                    passenger = demand.pop(0)
+                    cab.pickup = tupify(passenger[1], passenger[2])
+                    cab.dropoff = tupify(passenger[3], passenger[4])
+                    cab.path = cab.find(cab.current, cab.pickup)
+            else:
+                #Think about if this should be "else" or the cab should also update
+                cab.update()
+        time += 1
+
+    if time == i[0]:
+        pickupswitch = False
+        #loop through list of cabs to find empty cabs
+        for cab in PEVlist:
+            if cab.status == 'e':
+                cab.status = 'f'
+                #modify this indicator once you figure out how to split stuff
+                cab.pickup = tupify(i[1],i[2])
+                cab.dropoff = tupify(i[3],i[4])
+                cab.path = cab.find(cab.current, cab.pickup)
+                pickupswitch = True
+        #if all cabs are full, at to demand list
+        if pickupswitch = False:
+            demand.append(i)
+    else:
+        #somehow irregularities in the simulation
+        return "error"
+
 
 path = cab.find()
 print("--- %s seconds ---" % (time.time() - start_time))

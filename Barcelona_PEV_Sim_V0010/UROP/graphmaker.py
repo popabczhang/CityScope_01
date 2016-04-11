@@ -1,6 +1,7 @@
 f = open('RD_PTS_160401.txt', 'r')
 od = open('OD_160401.csv','r')
 import re
+import csv
 # f = open('RD_CRV_PTS_151231.txt', 'r')
 # with open('sample.txt', 'r') as reader:
 #   f = reader.read()
@@ -27,6 +28,13 @@ speed = 1
 
 pevnum = 3
 
+log = []
+
+def set_available():
+    global available    # Needed to modify global copy of globvar
+    available = 3
+
+set_available()
 #Put in object
     #current loc
     #Pickup loc
@@ -155,7 +163,7 @@ class PEV:
             if self.current == self.drop:
                 print "change from d to e" + self.stat
                 self.stat = 'e'
-
+                # available += 1
             elif self.current == self.pickup:
                 print "change from f to d"
                 #find new path
@@ -223,6 +231,7 @@ errorpath = 0
 wait = []
 
 for i in trip:
+    log.append([])
     print "in loop"
     print i[0]
     #some sort of index i that represents a LIST in the table once I figure out the proper way to read this
@@ -242,6 +251,7 @@ for i in trip:
         time += 1
         
     if time == int(i[0]):
+        log[len(log)-1].append(int(i[0]))
         # print "reached"
         pickupswitch = False
         #loop through list of cabs to find empty cabs
@@ -253,27 +263,56 @@ for i in trip:
                 print cab.dropoff
                 #modify this indicator once you figure out how to split stuff
                 if cab.find(cab.current, cab.pickup) != None:
+                    log[len(log)-1].append(cab.pickup)
+                    log[len(log)-1].append(cab.dropoff)
+                    log[len(log)-1].append(PEVlist.index(cab))
+                    #Logging available PEVs BEFORE they're taken
+                    # log[len(log)-1].append(available)
                     cab.stat = 'f'
+                    available -= 1
                     #modify this indicator once you figure out how to split stuff
                     cab.p = cab.find(cab.current, cab.pickup)
                     pickupswitch = True
+                    log[len(log)-1].append(True)
                     print "picked up by" + str(PEVlist.index(cab))
                     #check to make sure this is a list
                     print "Cab path"
                     print cab.p
                     waittime = len(cab.p)/speed
                     wait.append(waittime)
+                    log[len(log)-1].append(waittime)
                 else:
                     print "error no path"
                     errorpath += 1
+                    #log everything
+                    log[len(log)-1].append(None)
+                    log[len(log)-1].append(None)
+                    log[len(log)-1].append(None)
+                    #Logging available PEVs BEFORE they're taken
+                    # log[len(log)-1].append(available)
+                    log[len(log)-1].append(False)
+                    log[len(log)-1].append(None)
         #if all cabs are full, at to demand list
         if pickupswitch == False:
             # demand.append(i)
+            log[len(log)-1].append(None)
+            log[len(log)-1].append(None)
+            log[len(log)-1].append(None)
+            #Logging available PEVs BEFORE they're taken
+            # log[len(log)-1].append(available)
+            log[len(log)-1].append(False)
+            log[len(log)-1].append(None)
             missed += 1
             print "didn't pick up"
     else:
         #somehow irregularities in the simulation
         print "error simulator"
+print log
+
+#write log into csv
+with open('log.csv', 'w') as csvfile:
+    writer = csv.writer(csvfile)
+    [writer.writerow(r) for r in log]
 
 print wait
 #now to find average wait time

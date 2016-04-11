@@ -1,5 +1,6 @@
-f = open('sample.txt', 'r')
-od = open('OD_160330.tsv','r')
+f = open('RD_PTS_160401.txt', 'r')
+od = open('OD_160401.csv','r')
+import re
 # f = open('RD_CRV_PTS_151231.txt', 'r')
 # with open('sample.txt', 'r') as reader:
 #   f = reader.read()
@@ -20,7 +21,11 @@ g = {}
 lcount = -1
 
 #length of segment
-length = 4
+length = 1
+
+speed = 1
+
+pevnum = 3
 
 #Put in object
     #current loc
@@ -36,6 +41,11 @@ length = 4
 #Questions to ask:
 #How should we treat edge cases? I.e. Node of 1 point (is it even important to treat these)
 #Remove empty entries
+
+def coordify(coord):
+    l1 = coord.split(',')
+    tupver = (float(l1[0]),float(l1[1]))
+    return tupver
 
 s= 0
 l = []
@@ -64,12 +74,12 @@ for i in range(0,len(l)):
         elif l[i] == 'end':
             if lcount > 1:
                 # print "manual end" + l[i-1]
-                g[s].append(l[i-1])
+                g[s].append(coordify(l[i-1]))
             lcount = 0
 
         #Check for start of line/code
         elif lcount == 0:
-            s = l[i]
+            s = coordify(l[i])
             if s not in g.keys():
                 g[s] = []
             lcount += 1
@@ -78,15 +88,15 @@ for i in range(0,len(l)):
         #Check for end of segments
         elif lcount == length:
             # print "natural end" + l[i]
-            g[s].append(l[i])
-            s = l[i]
+            g[s].append(coordify(l[i]))
+            s = coordify(l[i])
             if s not in g.keys():
                 g[s] = []
             lcount = 1
 
         else:
             lcount += 1
-print g
+# print g
 
 start_time = time.time()
 
@@ -101,7 +111,7 @@ class PEV:
 
     #Start code for BST
     #Refer to http://eddmann.com/posts/depth-first-search-and-breadth-first-search-in-python/
-    def paths(s,g):
+    def paths(self,s,g):
         graph = self.g
         start = s
         goal = g
@@ -120,23 +130,38 @@ class PEV:
         if self.stat == 'e':
             pass
         #f for find
-        elif self.stat == 'f':
-            self.current = self.p.pop(0)
-        #d for dropping off
-        elif self.stat == 'd':
-            self.current = self.p.pop(0)
         else:
-            print "update error status"
+            if self.stat == 'f':
+                #Check LOCATION at BEGINNING.  
+                if self.current == self.pickup:
+                    print "change from f to d" + self.stat
+                    #find new path
+                    self.stat = 'd'
+                    self.p = self.find(self.current,self.dropoff)
+                else:
+                    self.current = self.p.pop(0)
+        #d for dropping off
+            elif self.stat == 'd':
+                if self.current == self.drop:
+                    print "change from d to e" + self.stat
+                    self.stat = 'e'
+                else:
+                    self.current = self.p.pop(0)
+            else:
+                print "update error status"
         #update location:  debug log: check what to do if cab finds the target location
-        if self.current == self.drop:
-            print "change from d to e" + self.stat
-            self.stat = 'e'
-        elif self.current == self.pickup:
-            print "change from f to d"
-            self.stat = 'd'
+        #No coincidence 
+        if self.stat != 'e':
+            if self.current == self.drop:
+                print "change from d to e" + self.stat
+                self.stat = 'e'
 
+            elif self.current == self.pickup:
+                print "change from f to d"
+                #find new path
+                self.stat = 'd'
 
-    def find(startfind,goalfind):
+    def find(self, startfind,goalfind):
         graph = self.g
         start = startfind
         goal = goalfind
@@ -148,146 +173,119 @@ class PEV:
         
 #Controller code
 
+#trip record:
+#1) basic trip data, request time, pickup/dropoff point, total pev, available pev #, nearest pev (use Null/N/a/None for no available pevs), missed/not, waiting time, time of pickup, time of dropoff, delivery time
+#2) PEV table 
+#Examples of uses:  Missed trips throughout the day, Distribution of PEV trips throughout the day
+
+
 #Initialize list of cabs:
+#figure out how to make this automated
+
+def tupify(x,y):
+    # print "tupify loop"
+    # print x
+    # print y
+    tup = (float(x),float(y))
+    return tup
+
 PEVlist = []
-cab1 = PEV([],g, '0', '1','16','e')
-PEVlist.append(cab1)
-cab2 = PEV([],g, '0', '1','16','e')
-PEVlist.append(cab2)
-cab3 = PEV([],g, '0', '1','16','e')
-PEVlist.append(cab3)
+for i in range(0, pevnum):
+    p = tupify('1378.1079','1391.5401')
+    d = tupify('1289.1814','1381.119')
+    c = tupify('1378.1079','1391.5401')
+    cab1 = PEV([],g,c, p, d,'e')
+    PEVlist.append(cab1)
 
 #Initialize time in minutes
 time = 0
 
-#initialize list of unpicked trips
-demand = []
+# #initialize list of unpicked trips
+# demand = []
 
-def tupify(x,y):
-    tup = (x,y)
-    return tup
+#log "trip record"
+#Total PEV: Request, pickup/dropoff
 
-for i in od:
+trip = []
+#Preprocess into list
+for line in od:
+    l1 = line.strip('\n')
+    l1 = l1.strip('\r')
+    l1 = l1.split(',')
+    trip.append(l1)
+
+#Take off the first line
+trip.pop(0)
+# print trip
+
+missed = 0
+errorpath = 0
+wait = []
+
+for i in trip:
+    print "in loop"
+    print i[0]
     #some sort of index i that represents a LIST in the table once I figure out the proper way to read this
-    while time < i[0]:
+    while time < int(i[0]):
         for cab in PEVlist:
-            if cab.status == 'e':
-                if len(demand) != 0:
-                    cab.status = 'f'
-                    #modify this indicator once you figure out how to split stuff
-                    passenger = demand.pop(0)
-                    cab.pickup = tupify(passenger[1], passenger[2])
-                    cab.dropoff = tupify(passenger[3], passenger[4])
-                    cab.path = cab.find(cab.current, cab.pickup)
-            else:
-                #Think about if this should be "else" or the cab should also update
-                cab.update()
+            # if cab.stat == 'e':
+            #     if len(demand) != 0:
+            #         cab.stat = 'f'
+            #         #modify this indicator once you figure out how to split stuff
+            #         passenger = demand.pop(0)
+            #         cab.pickup = tupify(passenger[1], passenger[2])
+            #         cab.dropoff = tupify(passenger[3], passenger[4])
+            #         cab.path = cab.find(cab.current, cab.pickup)
+            # else:
+            #     #Think about if this should be "else" or the cab should also update
+            cab.update()
         time += 1
-
-    if time == i[0]:
+        
+    if time == int(i[0]):
+        # print "reached"
         pickupswitch = False
         #loop through list of cabs to find empty cabs
         for cab in PEVlist:
-            if cab.status == 'e':
-                cab.status = 'f'
+            if cab.stat == 'e':
+                cab.pickup = tupify(i[1],-1*float(i[2]))
+                print cab.pickup
+                cab.dropoff = tupify(i[3],-1*float(i[4]))
+                print cab.dropoff
                 #modify this indicator once you figure out how to split stuff
-                cab.pickup = tupify(i[1],i[2])
-                cab.dropoff = tupify(i[3],i[4])
-                cab.path = cab.find(cab.current, cab.pickup)
-                pickupswitch = True
+                if cab.find(cab.current, cab.pickup) != None:
+                    cab.stat = 'f'
+                    #modify this indicator once you figure out how to split stuff
+                    cab.p = cab.find(cab.current, cab.pickup)
+                    pickupswitch = True
+                    print "picked up by" + str(PEVlist.index(cab))
+                    #check to make sure this is a list
+                    print "Cab path"
+                    print cab.p
+                    waittime = len(cab.p)/speed
+                    wait.append(waittime)
+                else:
+                    print "error no path"
+                    errorpath += 1
         #if all cabs are full, at to demand list
-        if pickupswitch = False:
-            demand.append(i)
+        if pickupswitch == False:
+            # demand.append(i)
+            missed += 1
+            print "didn't pick up"
     else:
         #somehow irregularities in the simulation
-        return "error"
+        print "error simulator"
 
+print wait
+#now to find average wait time
+sumwait = 0
+avewait = 0
 
-path = cab.find()
-print("--- %s seconds ---" % (time.time() - start_time))
-print path
-
-    # if l[i] != 'start':
-    #   #first = file.nextline()
-
-    #   #check for beginning of road
-    #   if l[i] == 'one way':
-    #       lcount = 0
-
-    #   #Check for manual end of road
-    #   elif l[i] == 'end':
-    #       if lcount > 1:
-    #           print "manual end" + l[i-1]
-    #           g[s].append(l[i-1])
-    #       lcount = 0
-
-    #   #Check for start of line/code
-    #   elif lcount == 0:
-    #       s = l[i]
-    #       if s not in g.keys():
-    #           g[s] = []
-    #       lcount += 1
-    #       print 'begin' + s
-
-    #   #Check for end of segments
-    #   elif lcount == length:
-    #       print "natural end" + l[i]
-    #       g[s].append(l[i])
-    #       s = l[i]
-    #       if s not in g.keys():
-    #           g[s] = []
-    #       lcount = 1
-
-    #   else:
-    #       lcount += 1
-    # # elif line == 'end':
-    # #     #g[first].append(lcount)
-    # #     print lcount
-    # # if line != 'one way\n' and lcount != -1:
-    # #     lcount += 1
-    # #     # if lcount == 1:
-    # #     # s = line
-    # #     # g[s] = []
-    # # if lcount == 1:
-    # #     g[s].append(line.strip('\n'))
-    # #     s = line.strip('\n')
-    # #     g[s] = []
-    # #     lcount = 0
-
-
-# def BFS(g,s,e):
-#   #q = queue
-#   #p = path
-#   #v = visited
-
-#   q = []
-#   p = []
-#   v = {}
-
-#   if s == e:
-#       return s
-#   #populate the start of the q
-#   for i in g[s]:
-#       if i != e:
-#           q.append(i)
-#   while q:
-#       c = q.pop(0)
-#       if c == e:
-#           return c
-#       for i in g[c]:
-#           q.append(i)
-    
-
-# l = BFS(g,0,"15")
-
-# print l
-
-# Dijkstra search algorithm
-# def search(start, end, graph):
-#   #ideally initiate q in heap
-#   q = []
-#   #path format: {start:(end, weight)}
-#   path = {}
-#   node = start
-#   for node != end:
-
+for i in wait:
+    sumwait += i
+avewait = sumwait/len(wait)
+print "average wait time" 
+print avewait
+print "missed trips"
+print missed
+print "trips with no path"
+print errorpath

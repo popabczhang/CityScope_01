@@ -24,7 +24,7 @@ lcount = -1
 #length of segment
 length = 1
 
-speed = 1
+speed = 3
 
 pevnum = 3
 
@@ -181,6 +181,8 @@ class PEV:
         
 #Controller code
 
+#Matplotlib
+
 #trip record:
 #1) basic trip data, request time, pickup/dropoff point, total pev, available pev #, nearest pev (use Null/N/a/None for no available pevs), missed/not, waiting time, time of pickup, time of dropoff, delivery time
 #2) PEV table 
@@ -279,16 +281,10 @@ for i in trip:
                     print "Cab path"
                     print cab.p
                     waittime = len(cab.p)/speed
+                    # waittuple = (int(i[0]),waittime)
                     wait.append(waittime)
                     log[len(log)-1].append(waittime)
-                else:
-                    print "error no path"
-                    errorpath += 1
-                    #log everything
-                    log[len(log)-1].append(None)
-                    log[len(log)-1].append(None)
-                    log[len(log)-1].append(None)
-                    #Logging available PEVs BEFORE they're taken
+                    break
                     # log[len(log)-1].append(available)
                     log[len(log)-1].append(False)
                     log[len(log)-1].append(None)

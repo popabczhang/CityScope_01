@@ -25,11 +25,21 @@ length = 1
 
 s= 0
 l = []
+
+def coordify(coord):
+    l1 = coord.split(',')
+    tupver = (float(l1[0]),float(l1[1]))
+    return tupver
+
 #Preprocess into list
 for line in f:
     l1 = line.strip('\n')
     l1 = l1.strip('\r')
     l.append(l1)
+
+#function for checking tolerance
+# def check(start,end):
+#     if start()
 
 for i in range(0,len(l)):
     # print line
@@ -46,12 +56,12 @@ for i in range(0,len(l)):
         elif l[i] == 'end':
             if lcount > 1:
                 # print "manual end" + l[i-1]
-                g[s].append(l[i-1])
+                g[s].append(coordify(l[i-1]))
             lcount = 0
 
         #Check for start of line/code
         elif lcount == 0:
-            s = l[i]
+            s = coordify(l[i])
             if s not in g.keys():
                 g[s] = []
             lcount += 1
@@ -60,14 +70,16 @@ for i in range(0,len(l)):
         #Check for end of segments
         elif lcount == length:
             # print "natural end" + l[i]
-            g[s].append(l[i])
-            s = l[i]
+            g[s].append(coordify(l[i]))
+            s = coordify(l[i])
             if s not in g.keys():
                 g[s] = []
             lcount = 1
 
         else:
             lcount += 1
+print g
+
 
 class PEV:
     def __init__(self, path, graph, current_location, pickup_location, dropoff, status):
@@ -125,5 +137,5 @@ class PEV:
             return None
     #return list of paths
 
-cab1 = PEV([],g, '0', '1445.558,1009.0937,0.0','1229.897,1374.1716,0.0','e')
+cab1 = PEV([],g, (1025.0939, 977.1576), (1025.0939, 977.1576), (1490.9119, 1007.7263),'e')
 print cab1.find()

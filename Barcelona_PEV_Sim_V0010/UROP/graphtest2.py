@@ -1,5 +1,5 @@
-f = open('RD_PTS_160401.txt', 'r')
-od = open('OD_160330.tsv','r')
+f = open('RD_160420.txt', 'r')
+od = open('OD_160420.csv','r')
 import re
 # f = open('RD_CRV_PTS_151231.txt', 'r')
 # with open('sample.txt', 'r') as reader:

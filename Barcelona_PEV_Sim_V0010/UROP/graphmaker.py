@@ -1,5 +1,7 @@
-f = open('RD_PTS_160401.txt', 'r')
-od = open('OD_160401.csv','r')
+# f = open('RD_160420.txt', 'r')
+# od = open('OD_160420.csv','r')
+f = open('RD_160420_2.txt', 'r')
+od = open('OD_160420_2.csv','r')
 import re
 import csv
 # f = open('RD_CRV_PTS_151231.txt', 'r')
@@ -201,10 +203,13 @@ def tupify(x,y):
 
 PEVlist = []
 for i in range(0, pevnum):
-    p = tupify('1378.1079','1391.5401')
-    d = tupify('1289.1814','1381.119')
-    c = tupify('1378.1079','1391.5401')
-    cab1 = PEV([],g,c, p, d,'e')
+    # p = tupify('1378.108','1391.54')
+    # d = tupify('1289.181','1381.119')
+    # c = tupify('1378.108','1391.54')
+    p = tupify('1201.809','1247.336')
+    d = tupify('1308.288','905.568')
+    c = tupify('1277.865','1247.336')
+    cab1 = PEV([], g, c, p, d,'e')
     PEVlist.append(cab1)
 
 #Initialize time in minutes

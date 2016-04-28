@@ -26,7 +26,7 @@ length = 1
 
 speed = 3
 
-pevnum = 3
+pevnum = 60
 
 log = []
 

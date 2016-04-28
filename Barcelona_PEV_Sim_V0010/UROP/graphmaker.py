@@ -1,5 +1,5 @@
-f = open('RD_PTS_160401.txt', 'r')
-od = open('OD_160401.csv','r')
+f = open('RD_160420.txt', 'r')
+od = open('OD_160420_dense.csv','r')
 import re
 import csv
 # f = open('RD_CRV_PTS_151231.txt', 'r')
@@ -84,7 +84,8 @@ for i in range(0,len(l)):
                 # print "manual end" + l[i-1]
                 g[s].append(coordify(l[i-1]))
             lcount = 0
-
+        elif l[i] == "<null>":
+            print "end" 
         #Check for start of line/code
         elif lcount == 0:
             s = coordify(l[i])
@@ -145,7 +146,11 @@ class PEV:
                     print "change from f to d" + self.stat
                     #find new path
                     self.stat = 'd'
-                    self.p = self.find(self.current,self.dropoff)
+                    print self.stat
+                    self.p = self.find(self.current,self.drop)
+                    # print self.p
+                    print "self.drop "
+                    print self.drop
                 else:
                     self.current = self.p.pop(0)
         #d for dropping off
@@ -153,21 +158,28 @@ class PEV:
                 if self.current == self.drop:
                     print "change from d to e" + self.stat
                     self.stat = 'e'
+                    print self.stat
                 else:
+                    # print "dropoff path"
+                    # print self.p
+                    # print "intended dropoff"
+                    # print self.drop
+                    # print self.current
+                    # print "d loop???"
                     self.current = self.p.pop(0)
             else:
                 print "update error status"
         #update location:  debug log: check what to do if cab finds the target location
         #No coincidence 
-        if self.stat != 'e':
-            if self.current == self.drop:
-                print "change from d to e" + self.stat
-                self.stat = 'e'
-                # available += 1
-            elif self.current == self.pickup:
-                print "change from f to d"
-                #find new path
-                self.stat = 'd'
+        # if self.stat != 'e':
+        #     if self.current == self.drop:
+        #         print "change from d to e" + self.stat
+        #         self.stat = 'e'
+        #         # available += 1
+        #     elif self.current == self.pickup:
+        #         print "change from f to d"
+        #         #find new path
+        #         self.stat = 'd'
 
     def find(self, startfind,goalfind):
         graph = self.g
@@ -189,6 +201,12 @@ class PEV:
 #Examples of uses:  Missed trips throughout the day, Distribution of PEV trips throughout the day
 
 
+#Priorities/what to do next:
+#refine process, graph #PEVs vs dropped trips, optimize.  Get rid of skipped requests.
+#Implement waitlist = > 1st available PEV => Pick up the one who waited the longest
+#Total travel time <=> efficiency
+#
+
 #Initialize list of cabs:
 #figure out how to make this automated
 
@@ -201,9 +219,9 @@ def tupify(x,y):
 
 PEVlist = []
 for i in range(0, pevnum):
-    p = tupify('1378.1079','1391.5401')
-    d = tupify('1289.1814','1381.119')
-    c = tupify('1378.1079','1391.5401')
+    p = tupify('1404.534','1012.322')
+    d = tupify('1390.86','1013.399')
+    c = tupify('1229.897','1374.172')
     cab1 = PEV([],g,c, p, d,'e')
     PEVlist.append(cab1)
 
@@ -259,9 +277,9 @@ for i in trip:
         #loop through list of cabs to find empty cabs
         for cab in PEVlist:
             if cab.stat == 'e':
-                cab.pickup = tupify(i[1],-1*float(i[2]))
+                cab.pickup = tupify(i[1],float(i[2]))
                 print cab.pickup
-                cab.dropoff = tupify(i[3],-1*float(i[4]))
+                cab.dropoff = tupify(i[3],float(i[4]))
                 print cab.dropoff
                 #modify this indicator once you figure out how to split stuff
                 if cab.find(cab.current, cab.pickup) != None:

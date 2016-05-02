@@ -1,5 +1,5 @@
-f = open('data/RD_160420.txt', 'r')
-od = open('data/OD_160502_1000trips_withRepeat_noIntersections.csv','r')
+f = open('data/RD_160502_testRoadNetwork.txt', 'r')
+od = open('data/OD_160502_testRoadNetwork_1000trips.csv','r')
 logFile = 'charts/160428_log_od1000_pev60.csv'
 import re
 import csv
@@ -242,9 +242,12 @@ def tupify(x,y):
 
 PEVlist = []
 for i in range(0, pevnum):
-    p = tupify('1404.534','1012.322')
-    d = tupify('1390.86','1013.399')
-    c = tupify('1229.897','1374.172')
+    # p = tupify('1404.534','1012.322')
+    # d = tupify('1390.86','1013.399')
+    # c = tupify('1229.897','1374.172')
+    p = tupify('2043.743','520.202')
+    d = tupify('1873.194','520.202')
+    c = tupify('1888.699','303.14')
     cab1 = PEV([],g,c, p, d,'e')
     PEVlist.append(cab1)
 

@@ -26,15 +26,36 @@ length = 1
 
 speed = 3
 
-pevnum = 60
+#bt = bigtable
+# bt = []
+
+#bti = big table index
+
+# bti = 0
+
+# for increment in range(10,100,10):
+#     bt.append([])
+
+# pevnum = increment
+pevnums = input('Enter# PEVs:')
+print "hi"
+print pevnums
+
+pevnum = int(pevnums)
+
+# bt[bti].append(pevnum)
 
 log = []
 
-def set_available():
-    global available    # Needed to modify global copy of globvar
-    available = 3
+#logging graph
+pvg = []
 
-set_available()
+# def set_available():
+#     global available    # Needed to modify global copy of globvar
+#     available = pevnum
+
+# set_available()
+
 #Put in object
     #current loc
     #Pickup loc
@@ -107,8 +128,6 @@ for i in range(0,len(l)):
             lcount += 1
 # print g
 
-start_time = time.time()
-
 class PEV:
     def __init__(self, path, graph, current_location, pickup_location, dropoff, status):
         self.g = graph
@@ -149,7 +168,7 @@ class PEV:
                     print self.stat
                     self.p = self.find(self.current,self.drop)
                     # print self.p
-                    print "self.drop "
+                    print "self.drop:"
                     print self.drop
                 else:
                     self.current = self.p.pop(0)
@@ -159,6 +178,7 @@ class PEV:
                     print "change from d to e" + self.stat
                     self.stat = 'e'
                     print self.stat
+                    print "out of e loop"
                 else:
                     # print "dropoff path"
                     # print self.p
@@ -278,18 +298,20 @@ for i in trip:
         for cab in PEVlist:
             if cab.stat == 'e':
                 cab.pickup = tupify(i[1],float(i[2]))
+                print "picking up"
                 print cab.pickup
-                cab.dropoff = tupify(i[3],float(i[4]))
-                print cab.dropoff
+                cab.drop = tupify(i[3],float(i[4]))
+                print cab.drop
+                print "dropping off"
                 #modify this indicator once you figure out how to split stuff
                 if cab.find(cab.current, cab.pickup) != None:
                     log[len(log)-1].append(cab.pickup)
-                    log[len(log)-1].append(cab.dropoff)
+                    log[len(log)-1].append(cab.drop)
                     log[len(log)-1].append(PEVlist.index(cab))
                     #Logging available PEVs BEFORE they're taken
                     # log[len(log)-1].append(available)
                     cab.stat = 'f'
-                    available -= 1
+                    # available -= 1
                     #modify this indicator once you figure out how to split stuff
                     cab.p = cab.find(cab.current, cab.pickup)
                     pickupswitch = True
@@ -336,9 +358,18 @@ avewait = 0
 for i in wait:
     sumwait += i
 avewait = sumwait/len(wait)
+# print "PEV number"
+# print pevnum
 print "average wait time" 
 print avewait
+# bt[bti].append(avewait)
 print "missed trips"
 print missed
+# bt[bti].append(missed)
 print "trips with no path"
 print errorpath
+#     bt[bti].append(errorpath)
+#     bti += 1
+
+# print bt
+

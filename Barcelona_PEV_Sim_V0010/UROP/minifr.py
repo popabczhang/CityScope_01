@@ -23,3 +23,7 @@ def coordify(coord):
     return tupver
 
 print coordify('1289.1814,1381.119,0.0')
+
+pevnums = input('Enter# PEVs:')
+print "hi"
+print pevnums

@@ -1,5 +1,6 @@
-f = open('RD_160420.txt', 'r')
-od = open('OD_160420_dense.csv','r')
+f = open('data/RD_160420.txt', 'r')
+od = open('data/OD_160502_1000trips_withRepeat_noIntersections.csv','r')
+logFile = 'charts/160428_log_od1000_pev60.csv'
 import re
 import csv
 # f = open('RD_CRV_PTS_151231.txt', 'r')
@@ -26,6 +27,8 @@ length = 1
 
 speed = 3
 
+pevnum = 60
+
 #bt = bigtable
 # bt = []
 
@@ -37,11 +40,11 @@ speed = 3
 #     bt.append([])
 
 # pevnum = increment
-pevnums = input('Enter# PEVs:')
-print "hi"
-print pevnums
+# pevnums = input('Enter# PEVs:')
+# print "hi"
+# print pevnums
 
-pevnum = int(pevnums)
+# pevnum = int(pevnums)
 
 # bt[bti].append(pevnum)
 
@@ -345,10 +348,10 @@ for i in trip:
         print "error simulator"
 print log
 
-#write log into csv
-with open('log.csv', 'w') as csvfile:
-    writer = csv.writer(csvfile)
-    [writer.writerow(r) for r in log]
+# #write log into csv
+# with open(logFile, 'w') as csvfile:
+#     writer = csv.writer(csvfile)
+#     [writer.writerow(r) for r in log]
 
 print wait
 #now to find average wait time

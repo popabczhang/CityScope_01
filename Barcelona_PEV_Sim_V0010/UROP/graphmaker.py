@@ -1,5 +1,5 @@
-f = open('RD_160420.txt', 'r')
-od = open('OD_160420_dense.csv','r')
+f = open('data/RD_160420.txt', 'r')
+od = open('data/OD_160502_1000trips_withRepeat_noIntersections.csv','r')
 import re
 import csv
 # f = open('RD_CRV_PTS_151231.txt', 'r')
@@ -8,6 +8,10 @@ import csv
 # reader.closed
 
 import time
+
+#Web interface
+#Wrap everything up in a function
+#Graphing 
 
 # dictionary format: {start: [(end1)],[(end2)]}
 
@@ -37,11 +41,12 @@ speed = 3
 #     bt.append([])
 
 # pevnum = increment
-pevnums = input('Enter# PEVs:')
-print "hi"
-print pevnums
+# pevnums = input('Enter# PEVs:')
+# print "hi"
+# print pevnums
 
-pevnum = int(pevnums)
+# pevnum = int(pevnums)
+pevnum = 50
 
 # bt[bti].append(pevnum)
 

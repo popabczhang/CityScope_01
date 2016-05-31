@@ -1,5 +1,6 @@
-f = open('RD_160420.txt', 'r')
-od = open('OD_160420_dense.csv','r')
+f = open('data/RD_160502_testRoadNetwork.txt', 'r')
+od = open('data/OD_160502_testRoadNetwork_1000trips.csv','r')
+logFile = 'charts/160428_log_od1000_pev60.csv'
 import re
 import csv
 # f = open('RD_CRV_PTS_151231.txt', 'r')
@@ -26,6 +27,8 @@ length = 1
 
 speed = 3
 
+pevnum = 60
+
 #bt = bigtable
 # bt = []
 
@@ -37,11 +40,11 @@ speed = 3
 #     bt.append([])
 
 # pevnum = increment
-pevnums = input('Enter# PEVs:')
-print "hi"
-print pevnums
+# pevnums = input('Enter# PEVs:')
+# print "hi"
+# print pevnums
 
-pevnum = int(pevnums)
+# pevnum = int(pevnums)
 
 # bt[bti].append(pevnum)
 
@@ -239,9 +242,12 @@ def tupify(x,y):
 
 PEVlist = []
 for i in range(0, pevnum):
-    p = tupify('1404.534','1012.322')
-    d = tupify('1390.86','1013.399')
-    c = tupify('1229.897','1374.172')
+    # p = tupify('1404.534','1012.322')
+    # d = tupify('1390.86','1013.399')
+    # c = tupify('1229.897','1374.172')
+    p = tupify('2043.743','520.202')
+    d = tupify('1873.194','520.202')
+    c = tupify('1888.699','303.14')
     cab1 = PEV([],g,c, p, d,'e')
     PEVlist.append(cab1)
 
@@ -345,10 +351,10 @@ for i in trip:
         print "error simulator"
 print log
 
-#write log into csv
-with open('log.csv', 'w') as csvfile:
-    writer = csv.writer(csvfile)
-    [writer.writerow(r) for r in log]
+# #write log into csv
+# with open(logFile, 'w') as csvfile:
+#     writer = csv.writer(csvfile)
+#     [writer.writerow(r) for r in log]
 
 print wait
 #now to find average wait time
